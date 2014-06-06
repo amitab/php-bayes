@@ -24,13 +24,20 @@ class Tokenizer {
 		$string = $this->filterNonsense($string);
 		return preg_split($this->patterns['sentence'], $string, null, PREG_SPLIT_NO_EMPTY);
 	}
-	
+
+	public function getSplits ($string) {
+		return preg_split($this->patterns['negate'], $string, null, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY);
+	}
 	
 	public function getEmoticons ($string) {
 		
 		preg_match_all($this->patterns['emoticons'], $string, $matches);
 		return $matches[0];
 		
+	}
+
+	public function getSentences ($string) {
+		return preg_split($this->patterns['split_string'], $string, null, PREG_SPLIT_NO_EMPTY);
 	}
 	
 }
