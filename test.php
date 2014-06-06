@@ -2,6 +2,7 @@
 
 // This path should point to Composer's autoloader
 require 'vendor/autoload.php';
+
 use Sentiment\Analysis\SentimentAnalysis;
 
 $analyser = new SentimentAnalysis(new PDO("mysql:dbname=test1;host=127.0.0.1;port=3306", "root", ""));
