@@ -136,27 +136,49 @@ class BayesClassifier {
 			'pos' => 0,
 			'neg' => 0
 		];
-		$splits = $this->tokenizer->getSplits($string);
+		$shifts = $this->tokenizer->getShifts($string);
+		$doShift = false;
+		// echo print_r($shifts);
 		echo "$string\n";
-		for($i = 0; $i < count($splits); $i++) {
-			$emoticons = $this->tokenizer->getEmoticons($splits[$i]);
-			$bag_of_words = $this->tokenizer->tokenize($splits[$i]);
-	
-			$bag_of_words = $this->textCleaner->clean($bag_of_words);
-			$res = $this->findSentiment(array_merge($bag_of_words, $emoticons));
-			if ($i % 2 != 0 || $i == 0) {
-				echo "Keep for " . $i . " " . $splits[$i] ."\n";
-				$scores['pos'] += $res['pos'];
-				$scores['neg'] += $res['neg'];
-			} else {
-				echo "Swap for " . $i . " " . $splits[$i] ."\n";
-				$scores['neg'] += $res['pos'];
-				$scores['pos'] += $res['neg'];
+		for($k = 0; $k < count($shifts); $k++) {
+			// echo "Shift $shifts[$k]\n";
+			$splits = $this->tokenizer->getSplits($shifts[$k]);
+			$pos = 0; $neg = 0;
+			for($i = 0; $i < count($splits); $i++) {
+				$emoticons = $this->tokenizer->getEmoticons($splits[$i]);
+				$bag_of_words = $this->tokenizer->tokenize($splits[$i]);
+		
+				$bag_of_words = $this->textCleaner->clean($bag_of_words);
+				$res = $this->findSentiment(array_merge($bag_of_words, $emoticons));
+				if ($i == 0) {
+					// echo "Keep for " . $i . " " . $splits[$i] ."\n";
+					$pos += $res['pos'];
+					$neg += $res['neg'];
+				} else {
+					// echo "Swap for " . $i . " " . $splits[$i] ."\n";
+					$neg += $res['pos'];
+					$pos += $res['neg'];
+				}
+				// echo "POS: Actual: " . $res['pos'] . ", Negated: " . $pos . "\n";
+				// echo "NEG: Actual: " . $res['neg'] . ", Negated: " . $neg . "\n";
 			}
-			echo "POS: " . $res['pos'] . ", " . $scores['pos'] . "\n";
-			echo "NEG: " . $res['neg'] . ", " . $scores['neg'] . "\n";
+			// echo "----------------------------------------------------------\n";
+			// echo "Shifter\n";
+			// echo "----------------------------------------------------------\n";
+			if ($doShift == false || $k % 2 != 0 || $k == 0) {
+				// echo "Dont Shift for " . $k . " " . $shifts[$k] ."\n";
+				$scores['pos'] += $pos;
+				$scores['neg'] += $neg;
+			} else {
+				// echo "Shift for " . $k . " " . $shifts[$k] ."\n";
+				$scores['neg'] += $pos;
+				$scores['pos'] += $neg;
+			}
+			$doShift = !$doShift;
+			// echo "POS: Actual: " . $pos . ", Shifted: " . $scores['pos'] . "\n";
+			// echo "NEG: Actual: " . $neg . ", Shifted: " . $scores['neg'] . "\n";
+			// echo "----------------------------------------------------------\n";
 		}
-		echo "----------------------------------------------------------\n";
 		$scores['pos'] = 1 / ( 1 + exp ( $scores['pos'] ) );
 		$scores['neg'] = 1 / ( 1 + exp ( $scores['neg'] ) );
 		return $scores;		

@@ -26,7 +26,11 @@ class Tokenizer {
 	}
 
 	public function getSplits ($string) {
-		return preg_split($this->patterns['negate'], $string, null, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY);
+		return preg_split($this->patterns['negate'], $string, null, PREG_SPLIT_NO_EMPTY);
+	}
+
+	public function getShifts ($string) {
+		return preg_split($this->patterns['sentence_shift'], $string, null, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY);
 	}
 	
 	public function getEmoticons ($string) {
