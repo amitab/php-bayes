@@ -131,68 +131,24 @@ class BayesClassifier {
 		return $test;
 	}
 
-	public function classify ($string) {
-		$scores = [
-			'pos' => 0,
-			'neg' => 0
-		];
-		$shifts = $this->tokenizer->getShifts($string);
-		$doShift = false;
-		// echo print_r($shifts);
-		echo "$string\n";
-		for($k = 0; $k < count($shifts); $k++) {
-			// echo "Shift $shifts[$k]\n";
-			$splits = $this->tokenizer->getSplits($shifts[$k]);
-			$pos = 0; $neg = 0;
-			for($i = 0; $i < count($splits); $i++) {
-				$emoticons = $this->tokenizer->getEmoticons($splits[$i]);
-				$bag_of_words = $this->tokenizer->tokenize($splits[$i]);
-		
-				$bag_of_words = $this->textCleaner->clean($bag_of_words);
-				$res = $this->findSentiment(array_merge($bag_of_words, $emoticons));
-				if ($i == 0) {
-					// echo "Keep for " . $i . " " . $splits[$i] ."\n";
-					$pos += $res['pos'];
-					$neg += $res['neg'];
-				} else {
-					// echo "Swap for " . $i . " " . $splits[$i] ."\n";
-					$neg += $res['pos'];
-					$pos += $res['neg'];
-				}
-				// echo "POS: Actual: " . $res['pos'] . ", Negated: " . $pos . "\n";
-				// echo "NEG: Actual: " . $res['neg'] . ", Negated: " . $neg . "\n";
-			}
-			// echo "----------------------------------------------------------\n";
-			// echo "Shifter\n";
-			// echo "----------------------------------------------------------\n";
-			if ($doShift == false || $k % 2 != 0 || $k == 0) {
-				// echo "Dont Shift for " . $k . " " . $shifts[$k] ."\n";
-				$scores['pos'] += $pos;
-				$scores['neg'] += $neg;
-			} else {
-				// echo "Shift for " . $k . " " . $shifts[$k] ."\n";
-				$scores['neg'] += $pos;
-				$scores['pos'] += $neg;
-			}
-			$doShift = !$doShift;
-			// echo "POS: Actual: " . $pos . ", Shifted: " . $scores['pos'] . "\n";
-			// echo "NEG: Actual: " . $neg . ", Shifted: " . $scores['neg'] . "\n";
-			// echo "----------------------------------------------------------\n";
+	public function classify_token ($token) {
+		$test = [];
+		foreach($this->labels as $label) {
+			$test[$label['label']] = 0;
+			$token = Porter::Stem($token);
+
+			$pOfLabelIfWord = $this->pOfLabelIfWord($token, $label);
+			if ($pOfLabelIfWord > 0)
+				$test[$label['label']] += (log( 1 - $pOfLabelIfWord ) - log( $pOfLabelIfWord ));
 		}
-		$scores['pos'] = 1 / ( 1 + exp ( $scores['pos'] ) );
-		$scores['neg'] = 1 / ( 1 + exp ( $scores['neg'] ) );
-		return $scores;		
+		return $test;
 	}
 
-	public function tokenize ($string) {
-		$emoticons = $this->tokenizer->getEmoticons($string);
-		$bag_of_words = $this->tokenizer->tokenize($string);
+	public function classify_sentence ($sentence) {
+		$emoticons = $this->tokenizer->getEmoticons($sentence);
+		$bag_of_words = $this->tokenizer->tokenize($sentence);
+
 		$bag_of_words = $this->textCleaner->clean($bag_of_words);
-
-		for ($i = 0; $i < count($bag_of_words); $i++) {
-			$bag_of_words[$i] = Porter::Stem($bag_of_words[$i]);
-		}
-
-		return $bag_of_words;
+		return $this->findSentiment(array_merge($bag_of_words, $emoticons));
 	}
 }
