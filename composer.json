@@ -1,5 +1,5 @@
 {
-    "name": "amitab/popcorn",
+    "name": "amitab/php-bayes",
     "description": "Naive Bayes classifier.",
     "keywords": ["analysis", "sentiment"],
     "license": "MIT",
