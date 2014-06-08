@@ -19,9 +19,9 @@ class Tokenizer {
 			
 			'split_string' => '/\./u',
 		
-			'negate' => '/(dont|don\'t|wasnt|shallnt|didn\'t|mustnt|hadn\'t|isnt|doesnt|won\'t|oughtnt|couldn\'t|cant|couldnt|shan\'t|aint|doesn\'t|hasnt|no|needn\'t|can\'t|shouldn\'t|amnt|haven\'t|arent|sha\'n\'t|shalln\'t|never|oughtn\'t|not|ain\'t|werent|hadnt|shant|aren\'t|neednt|twont|wont|nevertheless|hasn\'t|shouldnt|amn\'t|wasn\'t|weren\'t|\'twon\'t|havent|didnt|mustn\'t|isn\'t)/u',
+			'negate' => '/(dont|don\'t|wasnt|shallnt|didn\'t|mustnt|hadn\'t|isnt|doesnt|won\'t|oughtnt|couldn\'t|cant|couldnt|shan\'t|aint|doesn\'t|hasnt|no|needn\'t|can\'t|shouldn\'t|amnt|haven\'t|arent|sha\'n\'t|shalln\'t|never|oughtn\'t|not|ain\'t|werent|hadnt|shant|aren\'t|neednt|twont|wont|nevertheless|hasn\'t|shouldnt|amn\'t|wasn\'t|weren\'t|\'twon\'t|havent|didnt|mustn\'t|isn\'t)\b/u',
 
-			'sentence_shift' => '/(though|although|even though|despite|yet|however|but|nonetheless|nevertheless|still)/u'
+			'sentence_shift' => '/(though|although|even though|despite|yet|however|but|nonetheless|nevertheless|still)\b/u'
 		];
 	}
 	
