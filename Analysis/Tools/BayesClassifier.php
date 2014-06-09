@@ -126,6 +126,7 @@ class BayesClassifier {
 				$pOfLabelIfWord = $this->pOfLabelIfWord($token, $label);
 				if ($pOfLabelIfWord > 0)
 					$test[$label['label']] += (log( 1 - $pOfLabelIfWord ) - log( $pOfLabelIfWord ));
+				//echo $label['label'] . ":$token ($pOfLabelIfWord) (" . (log( 1 - $pOfLabelIfWord ) - log( $pOfLabelIfWord )) . ")" . "\n";
 			}
 		}
 		return $test;

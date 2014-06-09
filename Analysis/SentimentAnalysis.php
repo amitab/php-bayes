@@ -16,20 +16,41 @@ class SentimentAnalysis {
 			$this->tokenizer, $this->cleaner, ['pos', 'neg'], $client);
 	}
 
-	public function classify ($string) {
-		$scores = [
-			'pos' => 0,
-			'neg' => 0
-		];
+    public function classify ($para) {
+        echo "$para\n";
+        $scores = ['pos' => 0, 'neg' => 0];
+        foreach ($this->tokenizer->getSentences($para) as $sentence) {
+            $res = $this->classify_sentence($sentence);
+            $scores['pos'] += $res['pos'];
+            $scores['neg'] += $res['neg'];
+        }
+		$scores['pos'] = 1 / ( 1 + exp ( $scores['pos'] ) );
+		$scores['neg'] = 1 / ( 1 + exp ( $scores['neg'] ) );
+		return $scores;
+    }
+
+	public function classify_sentence ($string) {
+		$scores = [ 'pos' => 0, 'neg' => 0 ];
+		$string = strtolower($string);
+		//echo "$string\n";
 		$shifts = $this->tokenizer->getShifts($string);
 		$doShift = false;
 		for($k = 0; $k < count($shifts); $k++) {
 			$splits = $this->tokenizer->getSplits($shifts[$k]);
 			$split_res = $this->classifier->classify_sentence($splits[0]);
+            //echo "----------------------------------------------------------\n";
+            //echo "Main Split Res\n";
+            //echo $splits[0] . " : pos : ".$split_res['pos']." : neg : " .$split_res['neg']."\n";
+            //echo "----------------------------------------------------------\n";
 			$i = 1;
 			while($i < count($splits)) {
 				$negate_res = $this->classifier->classify_token($splits[$i]);
 				$res = $this->classifier->classify_sentence($splits[$i + 1]);
+                //echo "----------------------------------------------------------\n";
+                //echo "Negate Res\n";
+                //echo $splits[$i] . " : pos : ".$negate_res['pos']." : neg : " .$negate_res['neg']."\n";
+                //echo $splits[$i+1] . " : pos : ".$res['neg']." : neg : " .$res['pos']."\n";
+                //echo "----------------------------------------------------------\n";
 
 				$split_res['neg'] += $res['pos'];
 				$split_res['pos'] += $res['neg'];
@@ -43,17 +64,20 @@ class SentimentAnalysis {
 				}
 				$i += 2;
 			}
+            //echo "----------------------------------------------------------\n";
+            //echo "Shift Res\n";
 			if ($doShift == false || $k % 2 != 0 || $k == 0) {
 				$scores['pos'] += $split_res['pos'];
 				$scores['neg'] += $split_res['neg'];
+                //echo $shifts[$k] . " (NO SWAP) : pos : ".$split_res['pos']." : neg : " .$split_res['neg']."\n";
 			} else {
 				$scores['neg'] += $split_res['pos'];
 				$scores['pos'] += $split_res['neg'];
+                //echo $shifts[$k] . " (SWAP) : pos : ".$split_res['neg']." : neg : " .$split_res['pos']."\n";
 			}
+            //echo "----------------------------------------------------------\n";
 			$doShift = !$doShift;
 		}
-		$scores['pos'] = 1 / ( 1 + exp ( $scores['pos'] ) );
-		$scores['neg'] = 1 / ( 1 + exp ( $scores['neg'] ) );
 		return $scores;		
 	}
 
