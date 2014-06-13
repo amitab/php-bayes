@@ -1,3 +1,4 @@
 vendor/
 composer.lock
 results.json
+output.csv
