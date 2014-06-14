@@ -17,7 +17,7 @@ class SentimentAnalysis {
 	}
 
     public function classify ($para) {
-        echo "$para\n";
+        //echo "$para\n";
         $scores = ['pos' => 0, 'neg' => 0];
         foreach ($this->tokenizer->getSentences($para) as $sentence) {
             $res = $this->classify_sentence($sentence);
@@ -37,12 +37,17 @@ class SentimentAnalysis {
 		$doShift = false;
 		for($k = 0; $k < count($shifts); $k++) {
 			$splits = $this->tokenizer->getSplits($shifts[$k]);
-			$split_res = $this->classifier->classify_sentence($splits[0]);
             //echo "----------------------------------------------------------\n";
             //echo "Main Split Res\n";
             //echo $splits[0] . " : pos : ".$split_res['pos']." : neg : " .$split_res['neg']."\n";
-            //echo "----------------------------------------------------------\n";
-			$i = 1;
+			//echo "----------------------------------------------------------\n";
+			if (count($splits) % 2 != 0) {
+				$split_res = $this->classifier->classify_sentence($splits[0]);
+				$i = 1;
+			} else {
+				$split_res = $this->classifier->classify_token('');
+				$i = 0;
+			}
 			while($i < count($splits)) {
 				$negate_res = $this->classifier->classify_token($splits[$i]);
 				$res = $this->classifier->classify_sentence($splits[$i + 1]);
